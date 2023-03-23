@@ -28,7 +28,7 @@ session = Session(engine)
 #################################################
 # Flask Setup
 #################################################
-## WORK NEEDED HERE ##
+app = Flask(__name__)
 
 
 #################################################
@@ -37,7 +37,16 @@ session = Session(engine)
 
 @app.route("/")
 def welcome():
-## WORK NEEDED HERE ##
+    """List all available routes"""
+    return(
+        f"Welcome! Here are the available routes:<br/>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/temp/05102017<br/>"
+        f"/api/v1.0/temp/05102017/08012017<br/>"
+    )
+
 
 
 @app.route("/api/v1.0/precipitation")
@@ -52,8 +61,13 @@ def precipitation():
 
     session.close()
     # Dict with date as the key and prcp as the value
-    ## WORK NEEDED HERE ##
-    return ## WORK NEEDED HERE ##
+    precip_list = []
+    for date, prcp in precipitation:
+        precip_dict = {date:prcp}
+        precip_list.append(precip_dict)
+
+
+    return jsonify(precip_list)
 
 
 @app.route("/api/v1.0/stations")
@@ -65,7 +79,7 @@ def stations():
 
     # Unravel results into a 1D array and convert to a list
     stations = list(np.ravel(results))
-    return ## WORK NEEDED HERE ##
+    return jsonify(stations)
 
 
 @app.route("/api/v1.0/tobs")
@@ -111,10 +125,12 @@ def stats(start=None, end=None):
         session.close()
 
         temps = list(np.ravel(results))
-        return ## WORK NEEDED HERE ##
+        return jsonify(temps)
 
     # calculate TMIN, TAVG, TMAX with start and stop
-    ## WORK NEEDED HERE ##
+    if end:
+        start = dt.datetime.strptime(start, "%m%d%Y")
+        end = dt.datetime.strptime(end, "%m%d%Y")
 
     results = session.query(*sel).\
         filter(Measurement.date >= start).\
@@ -124,8 +140,8 @@ def stats(start=None, end=None):
 
     # Unravel results into a 1D array and convert to a list
     temps = list(np.ravel(results))
-    return ## WORK NEEDED HERE ##
+    return jsonify(temps)
 
 
 if __name__ == '__main__':
-    ## WORK NEEDED HERE ##
+    app.run(debug=True)
